@@ -1,3 +1,7 @@
+using HotelListing.Configruations;
+using HotelListing.Datas;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +11,11 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(typeof(MapperInitializi));
+builder.Services.AddDbContext<DataBaseContext>(dbContextOptions =>
+dbContextOptions.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"))
+);
 
 builder.Services.AddCors(options =>
 {
