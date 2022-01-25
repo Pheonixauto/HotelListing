@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelListing.Datas;
 using HotelListing.Models;
 
 namespace HotelListing.Configruations
@@ -9,8 +10,9 @@ namespace HotelListing.Configruations
         {
             CreateMap<Country, CountryDTO>().ReverseMap();
             CreateMap<Country, CreateCountryDTO>().ReverseMap();
-            CreateMap<Country, HotelDTO>().ReverseMap();
-            CreateMap<Country, CreateHotelDTO>().ReverseMap();
+            CreateMap<Hotel, HotelDTO>().ReverseMap();
+            CreateMap<Hotel, CreateHotelDTO>().ReverseMap();
+            CreateMap<ApiUser, UserDTO>().ReverseMap();
 
         }
     }
