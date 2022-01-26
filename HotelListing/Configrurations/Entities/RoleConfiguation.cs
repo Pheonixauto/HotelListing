@@ -16,7 +16,7 @@ namespace HotelListing.Configruations.Entities
                 },
                 new IdentityRole
                 {
-                    Name = "Aministrator",
+                    Name = "ADMINSTRATOR",
                     NormalizedName = "ADMINSTRATOR"
                 }
                 

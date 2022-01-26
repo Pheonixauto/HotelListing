@@ -8,14 +8,18 @@ namespace HotelListing
 {
     public static class ServiceExtensions
     {
+      
         public static void ConfigureIdentity(this IServiceCollection services)
         {
             var builder = services.AddIdentityCore<ApiUser>(q => q.User.RequireUniqueEmail=true);
             builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), services);
             builder.AddEntityFrameworkStores<DataBaseContext>().AddDefaultTokenProviders();
         }
+        
 
-        public static IConfiguration? Configuration { get; }
+        //public static IConfiguration _Configuration1  { get; }
+
+        
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration Configuration)
         {
             var jwtSettings = Configuration.GetSection("Jwt");
@@ -31,6 +35,7 @@ namespace HotelListing
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
+                        ValidateAudience = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = jwtSettings.GetSection("Issuer").Value,

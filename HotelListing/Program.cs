@@ -3,18 +3,20 @@ using HotelListing.Configruations;
 using HotelListing.Datas;
 using HotelListing.IRepository;
 using HotelListing.Repository;
+using HotelListing.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
-
-
-
-
+using System.Configuration;
+using System.Drawing;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+
 
 // Add services to the container.
 
@@ -29,12 +31,16 @@ builder.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoop
 builder.Services.AddAutoMapper(typeof(MapperInitializi));
 
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthManager, AuthManager>();
+builder.Services.ConfigureJWT(builder.Configuration);
 
 builder.Services.AddDbContext<DataBaseContext>(dbContextOptions =>
 dbContextOptions.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"))
 );
+
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();
+
 //builder.Services.ConfigureJWT();
 
 
@@ -57,6 +63,8 @@ builder.Host.UseSerilog((context, logconfig) =>
 
 var app = builder.Build();
 
+
+
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseRouting();
@@ -71,7 +79,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
@@ -85,4 +93,5 @@ app.UseEndpoints(endpoints =>
 app.MapControllers();
 
 app.Run();
+
 

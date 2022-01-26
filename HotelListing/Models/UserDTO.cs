@@ -18,7 +18,7 @@ namespace HotelListing.Models
         [DataType(DataType.PhoneNumber)]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public ICollection<string> Roles { get; set;}
+        public ICollection<string> Roles  { get; set;}
         //[Required]
         //[DataType(DataType.EmailAddress)]
         //public string Email { get; set; } 
