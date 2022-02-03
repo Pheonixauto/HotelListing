@@ -1,7 +1,9 @@
 ﻿using HotelListing.Datas;
 using HotelListing.IRepository;
+using HotelListing.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using X.PagedList;
 
 namespace HotelListing.Repository
 {
@@ -23,8 +25,8 @@ namespace HotelListing.Repository
 
         public async Task DeleteByName(string name)
         {
-            var entity = await _db.FindAsync(name);
-            _db.Remove(entity);
+            //var entity = await _db.;
+            //_db.Remove(entity);
         }
         public void DeleteRange(IEnumerable<T> entities)
         {
@@ -68,6 +70,19 @@ namespace HotelListing.Repository
             return await query.AsNoTracking().ToListAsync();
         }
 
+        public async Task<IPagedList<T>> GetPageList(RequestParams requesparams, List<string> includes = null)
+        {
+            IQueryable<T> query = _db;
+            if (includes != null)
+            {
+                foreach (var includeValue in includes)
+                {
+                    query = query.Include(includeValue);
+                }
+            }
+            return await query.AsNoTracking().ToPagedListAsync(requesparams.PageNumber, requesparams.PageSize);
+        }
+
         public async Task Insert(T entity)
         {
             _db.AddAsync(entity);
@@ -83,5 +98,6 @@ namespace HotelListing.Repository
             _db.Attach(entity);
             _dataBaseContext.Entry(entity).State = EntityState.Modified;
         }
+
     }
 }

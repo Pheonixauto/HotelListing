@@ -20,6 +20,7 @@ namespace HotelListing.Services
         {
             _userManager=userManager;
             _configuration=configuration;
+            
         }
         public  async Task<string> CreateToken()
         {

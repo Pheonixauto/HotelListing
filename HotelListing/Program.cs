@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using HotelListing;
 using HotelListing.Configruations;
 using HotelListing.Datas;
@@ -6,6 +7,7 @@ using HotelListing.Repository;
 using HotelListing.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -30,18 +32,29 @@ builder.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoop
 
 builder.Services.AddAutoMapper(typeof(MapperInitializi));
 
+
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.CongigureVersioning();
 
 builder.Services.AddDbContext<DataBaseContext>(dbContextOptions =>
 dbContextOptions.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"))
 );
 
+builder.Services.AddMemoryCache();
+
+builder.Services.ConfigureRateLimiting();
+builder.Services.AddHttpContextAccessor();
+
+//builder.Services.AddResponseCaching();
+
+builder.Services.ConfigureHttpCacheHeaders();
+
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();
 
-//builder.Services.ConfigureJWT();
+
 
 
 builder.Services.AddCors(options =>
@@ -53,6 +66,15 @@ builder.Services.AddCors(options =>
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                       });
+});
+
+builder.Services.AddControllers(configure =>
+{
+    configure.CacheProfiles.Add("120SecondsDuration", new CacheProfile
+    {
+        Duration = 120
+    });
+
 });
 
 builder.Host.UseSerilog((context, logconfig) =>
@@ -67,7 +89,14 @@ var app = builder.Build();
 
 app.UseCors(MyAllowSpecificOrigins);
 
+app.UseResponseCaching();
+app.UseHttpCacheHeaders();
+app.UseIpRateLimiting();
+
 app.UseRouting();
+
+
+
 
 
 
@@ -77,7 +106,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.ConfigureExeptionHandle();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

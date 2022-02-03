@@ -60,7 +60,7 @@ namespace HotelListing.Controllers
             catch (Exception ex)
             {
 
-                _logger.LogError($"Something wrong {nameof(Register)}");
+                _logger.LogError(ex, $"Something wrong {nameof(Register)}");
                 return Problem($"Something wrong in the {nameof(Register)}", statusCode: 500);
             }
         }
@@ -88,7 +88,7 @@ namespace HotelListing.Controllers
             catch (Exception ex)
             {
 
-                _logger.LogError($"Something wrong {nameof(Login)}");
+                _logger.LogError(ex,$"Something wrong {nameof(Login)}");
                 return Problem($"Something wrong in the {nameof(Login)}", statusCode: 500);
             }
         }

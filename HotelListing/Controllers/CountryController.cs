@@ -23,38 +23,49 @@ namespace HotelListing.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCountries()
+        [ResponseCache(CacheProfileName = "120SecondsDuration")]
+        public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)
         {
             try
             {
-                var uni = await iunitOfWork.Countries.GetAll();
+                var uni = await iunitOfWork.Countries.GetPageList(requestParams);
                 var results = imapper.Map<List<CountryDTO>>(uni);
                 return Ok(results);
-            }
-            catch (Exception x)
-            {
-                ilogger.LogError($"wrong");
-                return StatusCode(500, "try again");
-            }
-
-        }
-
-
-        //[Authorize]
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetCountryById (int id)
-        {
-            try
-            {
-                var uniId = await iunitOfWork.Countries.Get(q => q.Id == id, new List<string> { "Hotels" });
-                var result = imapper.Map<CountryDTO>(uniId);
-                return Ok(result);
             }
             catch (Exception ex)
             {
                 ilogger.LogError(ex, $"wrong");
                 return StatusCode(500, "try again");
             }
+
+        }
+
+
+        //[Authorize(Roles = "User")]
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetCountryById(int id)
+        {
+            //throw new Exception();
+            //try
+            //{
+            var uniId = await iunitOfWork.Countries.Get(q => q.Id == id, new List<string> { "Hotels" });
+            var result = imapper.Map<CountryDTO>(uniId);
+
+            HotelCountryDTO hotelCountryDTO = new HotelCountryDTO();
+            hotelCountryDTO.NameCountry = result.Name;
+            IList<string> listName = new List<string>();
+            foreach (var item in result.Hotels)
+            {
+                listName.Add(item.Name);
+            }
+            hotelCountryDTO.NameHotel = listName;
+            return Ok(hotelCountryDTO);
+            //}
+            //catch (Exception ex)
+            //{
+            //    ilogger.LogError(ex, $"wrong");
+            //    return StatusCode(500, "try again");
+            //}
 
         }
 
@@ -67,9 +78,9 @@ namespace HotelListing.Controllers
                 var result = imapper.Map<CountryDTO>(uniId);
                 return Ok(result);
             }
-            catch (Exception x)
+            catch (Exception ex)
             {
-                ilogger.LogError($"wrong");
+                ilogger.LogError(ex, $"wrong");
                 return StatusCode(500, "try again");
             }
 
@@ -100,7 +111,7 @@ namespace HotelListing.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.sta)]
         public async Task<IActionResult> PutCountry(int id, [FromBody] CreateCountryDTO createCountryDTO)
         {
             if (!ModelState.IsValid || id <= 0)
@@ -118,7 +129,7 @@ namespace HotelListing.Controllers
                 imapper.Map(createCountryDTO, country);
                 iunitOfWork.Countries.Update(country);
                 await iunitOfWork.Save();
-                return NoContent();
+                return Ok(200);
             }
             catch (Exception e)
             {
@@ -139,6 +150,10 @@ namespace HotelListing.Controllers
             try
             {
                 var country = await iunitOfWork.Countries.Get(q => q.Id == id);
+                if (country == null)
+                {
+
+                }
                 await iunitOfWork.Countries.Delete(id);
                 await iunitOfWork.Save();
                 return new JsonResult($"Delete Success {id} ");
@@ -162,10 +177,10 @@ namespace HotelListing.Controllers
             try
             {
                 var country = await iunitOfWork.Countries.Get(q => q.Name == name);
-                //var countryId = country.Id;
-                //await iunitOfWork.Countries.Delete(countryId);  
-                
-                await iunitOfWork.Countries.DeleteByName(name);
+                var countryid = country.Id;
+                await iunitOfWork.Countries.Delete(countryid);
+
+                //await iunitOfWork.Countries.DeleteByName(name);
 
 
                 await iunitOfWork.Save();
